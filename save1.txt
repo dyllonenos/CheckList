@@ -1,0 +1,4 @@
+do hw -> true
+workout -> false
+watch tv -> true
+go to sleep -> false
