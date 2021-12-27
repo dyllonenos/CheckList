@@ -153,9 +153,11 @@ public class CLGui extends Application implements Observer {
 			anotherStage.setScene(new Scene(pane, 300, 100));
 			anotherStage.show();
 		});
-		main_pane.setTop(newTaskButton);
-		main_pane.setBottom(saveButton);
-		main_pane.setRight(loadButton);
+		HBox menue_bar = new HBox();
+		menue_bar.getChildren().add(newTaskButton);
+		menue_bar.getChildren().add(saveButton);
+		menue_bar.getChildren().add(loadButton);
+		main_pane.setTop(menue_bar);
 	}
 
 	@Override
