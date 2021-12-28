@@ -1,5 +1,7 @@
 package controller;
 
+import java.util.HashMap;
+
 import model.CLModel;
 
 public class CLController {
@@ -24,5 +26,13 @@ public class CLController {
 	
 	public void uncompleteTask(String task) {
 		this.model.uncompleteTask(task);
+	}
+	
+	public void save(String file_name, HashMap<String, Boolean> progress) {
+		this.model.save(file_name, progress);
+	}
+	
+	public HashMap<String, Boolean> load(String file_name) {
+		return this.model.load(file_name);
 	}
 }
