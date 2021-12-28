@@ -20,6 +20,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.Scanner;
@@ -78,26 +79,24 @@ public class CLGui extends Application implements Observer {
 			txt_fld.setFocusTraversable(false);
 			txt_fld.setOnKeyPressed((event2)->{
 				if (event2.getCode() == KeyCode.ENTER) {
-					String input_task = txt_fld.getText();
-					try {
-						FileWriter writer = new FileWriter(input_task + ".txt");
+					String input = txt_fld.getText() + ".txt";
+					HashMap<String, Boolean> curr_progress = new HashMap<>();
 						for (Object curr_obj : this.list_pane.getChildren()) {
 							HBox curr_hbox = (HBox) curr_obj;
 							CheckBox curr_checkBox = (CheckBox) curr_hbox.getChildren().get(0);
 							Label curr_label = (Label) curr_hbox.getChildren().get(1);
 							if (curr_checkBox.isSelected()) {
-								writer.write(curr_label.getText() + " -> true\n");
+								curr_progress.put(curr_label.getText(), true);
 							}
 							else {
-								writer.write(curr_label.getText() + " -> false\n");
+								curr_progress.put(curr_label.getText(), false);
 							}
 						}
-						writer.close();
-					} catch (IOException e) {
-					}
+					controller.save(input, curr_progress);
 					anotherStage.close();
 				}
 			});
+			pane.setTop(new Label("Enter the name of your save"));
 			pane.setCenter(txt_fld);
 			anotherStage.setTitle("Enter File Name To Save");
 			anotherStage.setScene(new Scene(pane, 300, 100));

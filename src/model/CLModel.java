@@ -1,4 +1,6 @@
 package model;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.*;
 import java.util.Observable;
 
@@ -45,5 +47,17 @@ public class CLModel extends Observable {
 	
 	public void uncompleteTask(String task) {
 		this.list.replace(task, false);
+	}
+	
+	public void save(String file_name, HashMap<String, Boolean> progress) {
+		try {
+			FileWriter writer = new FileWriter(file_name);
+			for (Map.Entry<String, Boolean> entry : progress.entrySet()) {
+				writer.write(entry.getKey() + " -> "+ entry.getValue() + "\n");
+			}
+			writer.close();
+		} catch (IOException e) {
+			return;
+		}
 	}
 }
