@@ -31,4 +31,8 @@ public class CLController {
 	public void save(String file_name, HashMap<String, Boolean> progress) {
 		this.model.save(file_name, progress);
 	}
+	
+	public HashMap<String, Boolean> load(String file_name) {
+		return this.model.load(file_name);
+	}
 }
