@@ -53,6 +53,7 @@ public class CLModel extends Observable {
 	public void save(String file_name) {
 		try {
 			FileWriter writer = new FileWriter(file_name);
+			writer.write("File Type: Checklist File\n");
 			for (Map.Entry<String, Boolean> entry : list.entrySet()) {
 				writer.write(entry.getKey() + " -> " + entry.getValue() + "\n");
 			}
@@ -71,11 +72,14 @@ public class CLModel extends Observable {
 		} catch (FileNotFoundException fnfe) {
 			return;
 		}
-		while (scanner.hasNext()) {
-			String next_line = scanner.nextLine();
-			String task_name = next_line.split("->")[0].trim();
-			boolean status = Boolean.valueOf(next_line.split("->")[1].trim());
-			addTask(task_name, status);
+		String first_line = scanner.nextLine();
+		if (first_line.equals("File Type: Checklist File")) {
+			while (scanner.hasNext()) {
+				String next_line = scanner.nextLine();
+				String task_name = next_line.split("->")[0].trim();
+				boolean status = Boolean.valueOf(next_line.split("->")[1].trim());
+				addTask(task_name, status);
+			}
 		}
 		scanner.close();
 	}
