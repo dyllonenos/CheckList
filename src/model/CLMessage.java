@@ -4,11 +4,13 @@ public class CLMessage {
 	private String action;
 	private String task;
 	private boolean isError;
+	private boolean status;
 	
-	public CLMessage(String action, String task, boolean error) {
+	public CLMessage(String action, String task, boolean error, boolean status) {
 		this.action = action;
 		this.isError = error;
 		this.task = task;
+		this.status = status;
 	}
 	
 	public String getAction() {
@@ -21,5 +23,9 @@ public class CLMessage {
 	
 	public String getTask() {
 		return this.task;
+	}
+	
+	public boolean getStatus() {
+		return this.status;
 	}
 }

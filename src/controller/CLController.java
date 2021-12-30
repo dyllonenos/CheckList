@@ -1,7 +1,4 @@
 package controller;
-
-import java.util.HashMap;
-
 import model.CLModel;
 
 public class CLController {
@@ -12,8 +9,8 @@ public class CLController {
 		this.model = model;
 	}
 	
-	public void addTask(String task) {
-		this.model.addTask(task);
+	public void addTask(String task, boolean status) {
+		this.model.addTask(task, status);
 	}
 	
 	public void completeTask(String task) {
@@ -28,11 +25,15 @@ public class CLController {
 		this.model.uncompleteTask(task);
 	}
 	
-	public void save(String file_name, HashMap<String, Boolean> progress) {
-		this.model.save(file_name, progress);
+	public void save(String file_name) {
+		this.model.save(file_name);
 	}
 	
-	public HashMap<String, Boolean> load(String file_name) {
-		return this.model.load(file_name);
+	public void load(String file_name) {
+		this.model.load(file_name);
+	}
+	
+	public int numberOfEntries() {
+		return this.model.numberOfEntries();
 	}
 }

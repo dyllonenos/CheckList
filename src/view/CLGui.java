@@ -7,6 +7,7 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
 import javafx.scene.control.Alert.AlertType;
@@ -17,8 +18,6 @@ import javafx.stage.Stage;
 import model.CLMessage;
 import model.CLModel;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
 
@@ -31,15 +30,18 @@ public class CLGui extends Application implements Observer {
 	private GridPane list_pane = new GridPane();
 	private CLModel model = new CLModel();
 	private CLController controller = new CLController(model);
+	private Stage main_stage;
+	private ScrollPane scroll_pane = new ScrollPane();
 
 	@Override
 	public void start(Stage stage) throws Exception {
 		model.addObserver(this);
 		makeGui();
-		Scene scene = new Scene(main_pane, 300, 300);
-		stage.setTitle("Check List");
-		stage.setScene(scene);
-		stage.show();
+		main_stage = stage;
+		Scene scene = new Scene(main_pane, 300,  300);
+		main_stage.setTitle("Check List");
+		main_stage.setScene(scene);
+		main_stage.show();
 
 	}
 
@@ -47,7 +49,26 @@ public class CLGui extends Application implements Observer {
 	 * 
 	 */
 	private void makeGui() {
-		main_pane.setCenter(list_pane);
+		scroll_pane.setContent(list_pane);
+		main_pane.setCenter(scroll_pane);
+		
+		Button newTaskButton = setAddButton();
+		Button saveButton = setSaveButton();
+		Button loadButton = setLoadButton();
+		Button removeTaskButton = setRemoveButton();
+		
+		HBox menue_bar = new HBox();
+		menue_bar.getChildren().add(newTaskButton);
+		menue_bar.getChildren().add(removeTaskButton);
+		menue_bar.getChildren().add(saveButton);
+		menue_bar.getChildren().add(loadButton);
+		main_pane.setTop(menue_bar);
+	}
+
+	/**
+	 * @return
+	 */
+	private Button setAddButton() {
 		Button newTaskButton = new Button("New Task");
 		newTaskButton.setOnAction((event) -> {
 			Stage anotherStage = new Stage();
@@ -58,7 +79,7 @@ public class CLGui extends Application implements Observer {
 			txt_fld.setOnKeyPressed((event2) -> {
 				if (event2.getCode() == KeyCode.ENTER) {
 					String input_task = txt_fld.getText();
-					controller.addTask(input_task);
+					controller.addTask(input_task, false);
 					anotherStage.close();
 				}
 			});
@@ -67,6 +88,40 @@ public class CLGui extends Application implements Observer {
 			anotherStage.setScene(new Scene(pane, 300, 100));
 			anotherStage.show();
 		});
+		return newTaskButton;
+	}
+
+	/**
+	 * @return
+	 */
+	private Button setRemoveButton() {
+		Button removeTaskButton = new Button("Remove");
+		removeTaskButton.setOnAction((event)->{
+			Stage anotherStage = new Stage();
+			BorderPane pane = new BorderPane();
+			TextField txt_fld = new TextField();
+			txt_fld.setPromptText("Enter task to remove");
+			txt_fld.setFocusTraversable(false);
+			txt_fld.setOnKeyPressed((event2) -> {
+				if (event2.getCode() == KeyCode.ENTER) {
+					String input = txt_fld.getText();
+					controller.removeTask(input);
+					anotherStage.close();
+				}
+			});
+			pane.setTop(new Label("Enter the name of task to remove"));
+			pane.setCenter(txt_fld);
+			anotherStage.setTitle("Remove Task");
+			anotherStage.setScene(new Scene(pane, 300, 100));
+			anotherStage.show();
+		});
+		return removeTaskButton;
+	}
+
+	/**
+	 * @return
+	 */
+	private Button setSaveButton() {
 		Button saveButton = new Button("Save");
 		saveButton.setOnAction((event) -> {
 			Stage anotherStage = new Stage();
@@ -77,18 +132,7 @@ public class CLGui extends Application implements Observer {
 			txt_fld.setOnKeyPressed((event2) -> {
 				if (event2.getCode() == KeyCode.ENTER) {
 					String input = txt_fld.getText() + ".txt";
-					HashMap<String, Boolean> curr_progress = new HashMap<>();
-					for (Object curr_obj : this.list_pane.getChildren()) {
-						HBox curr_hbox = (HBox) curr_obj;
-						CheckBox curr_checkBox = (CheckBox) curr_hbox.getChildren().get(0);
-						Label curr_label = (Label) curr_hbox.getChildren().get(1);
-						if (curr_checkBox.isSelected()) {
-							curr_progress.put(curr_label.getText(), true);
-						} else {
-							curr_progress.put(curr_label.getText(), false);
-						}
-					}
-					controller.save(input, curr_progress);
+					controller.save(input);
 					anotherStage.close();
 				}
 			});
@@ -98,7 +142,13 @@ public class CLGui extends Application implements Observer {
 			anotherStage.setScene(new Scene(pane, 300, 100));
 			anotherStage.show();
 		});
+		return saveButton;
+	}
 
+	/**
+	 * @return
+	 */
+	private Button setLoadButton() {
 		Button loadButton = new Button("Load");
 		loadButton.setOnAction((event) -> {
 			Stage anotherStage = new Stage();
@@ -109,30 +159,8 @@ public class CLGui extends Application implements Observer {
 			txt_fld.setOnKeyPressed((event2) -> {
 				if (event2.getCode() == KeyCode.ENTER) {
 					String input = txt_fld.getText() + ".txt";
-					HashMap<String, Boolean> new_tasks = this.controller.load(input);
 					this.list_pane.getChildren().clear();
-					for (Map.Entry<String, Boolean> entry : new_tasks.entrySet()) {
-						String curr_task = entry.getKey();
-						boolean curr_status = entry.getValue();
-						int row_count = this.list_pane.getRowCount();
-
-						HBox hbox = new HBox();
-						CheckBox checkBox = new CheckBox();
-						checkBox.setSelected(curr_status);
-						checkBox.setPadding(new Insets(2));
-						checkBox.setOnAction((event3) -> {
-							if (checkBox.isSelected()) {
-								controller.completeTask(curr_task);
-							} else {
-								controller.uncompleteTask(curr_task);
-							}
-						});
-						Label label = new Label(curr_task);
-						hbox.getChildren().add(checkBox);
-						hbox.getChildren().add(label);
-						hbox.setPadding(new Insets(5));
-						this.list_pane.add(hbox, 0, row_count + 1);
-					}
+					this.controller.load(input);
 					anotherStage.close();
 				}
 			});
@@ -142,11 +170,7 @@ public class CLGui extends Application implements Observer {
 			anotherStage.setScene(new Scene(pane, 300, 100));
 			anotherStage.show();
 		});
-		HBox menue_bar = new HBox();
-		menue_bar.getChildren().add(newTaskButton);
-		menue_bar.getChildren().add(saveButton);
-		menue_bar.getChildren().add(loadButton);
-		main_pane.setTop(menue_bar);
+		return loadButton;
 	}
 
 	@Override
@@ -155,6 +179,7 @@ public class CLGui extends Application implements Observer {
 		String action = message.getAction();
 		String task_name = message.getTask();
 		boolean isError = message.getErrorStatus();
+		boolean status = message.getStatus();
 		int row_count = this.list_pane.getRowCount();
 
 		// ERROR Check
@@ -167,6 +192,7 @@ public class CLGui extends Application implements Observer {
 			if (action.equals("add")) {
 				HBox hbox = new HBox();
 				CheckBox checkBox = new CheckBox();
+				checkBox.setSelected(status);
 				checkBox.setPadding(new Insets(2));
 				checkBox.setOnAction((event) -> {
 					if (checkBox.isSelected()) {
