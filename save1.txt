@@ -1,4 +1,0 @@
-do hw -> true
-go to sleep -> true
-workout -> false
-watch tv -> true

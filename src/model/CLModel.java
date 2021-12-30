@@ -9,25 +9,25 @@ import java.util.Observable;
 
 @SuppressWarnings("deprecation")
 public class CLModel extends Observable {
-	private HashMap<String, Boolean> list;
+	private LinkedHashMap<String, Boolean> list;
 
 	/**
 	 * Constructor
 	 */
 	public CLModel() {
-		this.list = new HashMap<>();
+		this.list = new LinkedHashMap<>();
 	}
 
-	public void addTask(String task) {
+	public void addTask(String task, boolean status) {
 		boolean result;
 		if (this.list.containsKey(task)) {
 			result = true;
 		} else {
 			result = false;
-			this.list.put(task, false);
+			this.list.put(task, status);
 		}
 		setChanged();
-		notifyObservers(new CLMessage("add", task, result));
+		notifyObservers(new CLMessage("add", task, result, status));
 	}
 
 	public void completeTask(String task) {
@@ -43,17 +43,17 @@ public class CLModel extends Observable {
 			result = true;
 		}
 		setChanged();
-		notifyObservers(new CLMessage("remove", task, result));
+		notifyObservers(new CLMessage("remove", task, result, false));
 	}
 
 	public void uncompleteTask(String task) {
 		this.list.replace(task, false);
 	}
 
-	public void save(String file_name, HashMap<String, Boolean> progress) {
+	public void save(String file_name) {
 		try {
 			FileWriter writer = new FileWriter(file_name);
-			for (Map.Entry<String, Boolean> entry : progress.entrySet()) {
+			for (Map.Entry<String, Boolean> entry : list.entrySet()) {
 				writer.write(entry.getKey() + " -> " + entry.getValue() + "\n");
 			}
 			writer.close();
@@ -62,23 +62,25 @@ public class CLModel extends Observable {
 		}
 	}
 
-	public HashMap<String, Boolean> load(String file_name) {
+	public void load(String file_name) {
 		File file = new File(file_name);
-		HashMap<String, Boolean> progress = new HashMap<>();
+		this.list.clear();
 		Scanner scanner;
 		try {
 			scanner = new Scanner(file);
 		} catch (FileNotFoundException fnfe) {
-			return null;
+			return;
 		}
 		while (scanner.hasNext()) {
 			String next_line = scanner.nextLine();
 			String task_name = next_line.split("->")[0].trim();
 			boolean status = Boolean.valueOf(next_line.split("->")[1].trim());
-			progress.put(task_name, status);
+			addTask(task_name, status);
 		}
 		scanner.close();
-		this.list = progress;
-		return progress;
+	}
+	
+	public int numberOfEntries() {
+		return this.list.size();
 	}
 }
